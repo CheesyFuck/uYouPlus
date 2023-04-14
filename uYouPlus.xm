@@ -246,9 +246,23 @@ static BOOL didFinishLaunching;
 }
 %end
 
+%hook YTHotConfig
+- (BOOL)disableAfmaIdfaCollection { return NO; }
+%end
+
 // https://github.com/PoomSmart/YouTube-X/blob/1e62b68e9027fcb849a75f54a402a530385f2a51/Tweak.x#L27
-%hook YTAdsInnerTubeContextDecorator
-- (void)decorateContext:(id)context {}
+// %hook YTAdsInnerTubeContextDecorator
+// - (void)decorateContext:(id)context {}
+// %end
+
+// Fix login for YouTube 18.13.2 and higher
+%hook SSOKeychainHelper
++ (NSString *)accessGroup {
+    return accessGroupID();
+}
++ (NSString *)sharedAccessGroup {
+    return accessGroupID();
+}
 %end
 
 // Fix login for YouTube 17.33.2 and higher
@@ -866,6 +880,12 @@ void DEMC_centerRenderingView() {
 %end
 %end
 
+%hook YTDoubleTapToSeekController
+- (void)enableDoubleTapToSeek:(BOOL)arg1 {
+    return IsEnabled(@"doubleTapToSeek_disabled") ? %orig(NO) : %orig;
+}
+%end
+
 // Video Controls Overlay Options
 // Hide CC / Autoplay switch
 %hook YTMainAppControlsOverlayView
@@ -1294,14 +1314,6 @@ UIColor* raisedColor = [UIColor colorWithRed:0.035 green:0.035 blue:0.035 alpha:
 %hook YTHeaderContentComboView
 - (void)setFeedHeaderScrollMode:(int)arg1 { %orig(0); }
 %end
-
-// Hide the chip bar under the video player?
-// %hook YTChipCloudCell // 
-// - (void)didMoveToWindow {
-//     %orig;
-//     self.hidden = YES;
-// }
-// %end
 %end
 
 %group giPhoneLayout
@@ -1341,40 +1353,40 @@ UIColor* raisedColor = [UIColor colorWithRed:0.035 green:0.035 blue:0.035 alpha:
 
     %init;
     if (@available(iOS 16, *)) {
-       %init(iOS16);
+        %init(iOS16);
     }
     if (IsEnabled(@"reExplore_enabled")) {
-       %init(gReExplore);
+        %init(gReExplore);
     }
     if (IsEnabled(@"bigYTMiniPlayer_enabled") && (UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)) {
-       %init(Main);
+        %init(Main);
     }
     if (IsEnabled(@"dontEatMyContent_enabled") && DEMC_deviceIsSupported()) {
-       %init(gDontEatMyContent);
+        %init(gDontEatMyContent);
     }
     if (IsEnabled(@"hidePreviousAndNextButton_enabled")) {
-       %init(gHidePreviousAndNextButton);
+        %init(gHidePreviousAndNextButton);
     }
     if (IsEnabled(@"replacePreviousAndNextButton_enabled")) {
-       %init(gReplacePreviousAndNextButton);
+        %init(gReplacePreviousAndNextButton);
     }
     if (oledDarkTheme()) {
-       %init(gOLED);
+        %init(gOLED);
     }
     if (oldDarkTheme()) {
-       %init(gOldDarkTheme)
+        %init(gOldDarkTheme)
     }
     if (IsEnabled(@"oledKeyBoard_enabled")) {
-       %init(gOLEDKB);
+        %init(gOLEDKB);
     }
     if (IsEnabled(@"disableHints_enabled")) {
-       %init(gDisableHints);
+        %init(gDisableHints);
     }
     if (IsEnabled(@"hideChipBar_enabled")) {
-       %init(gHideChipBar);
+        %init(gHideChipBar);
     }
     if (IsEnabled(@"iPhoneLayout_enabled") && (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)) {
-       %init(giPhoneLayout);
+        %init(giPhoneLayout);
     }
     if (IsEnabled(@"stockVolumeHUD_enabled")) {
         %init(gStockVolumeHUD);
